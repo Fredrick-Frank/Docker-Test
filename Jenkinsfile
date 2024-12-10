@@ -2,15 +2,16 @@ pipeline {
     agent any
     environment {
         DOCKER_REGISTRY = 'igwefredrickchiemeka@gmail.com'
-        DOCKER_USERNAME = 'igfred' // Set Docker username as plaintext or parameter
     }
     stages {
         stage('Docker Login') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'docker-credentials-id', variable: 'docker-credentials-id')]) {
+                    withCredentials([usernamePassword(credentialsId: 'docker-credentials-id', 
+                                                     usernameVariable: 'DOCKER_USERNAME', 
+                                                     passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh """
-                        echo "$docker-credentials-id" | docker login -u $DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
                         """
                     }
                 }
@@ -29,7 +30,7 @@ pipeline {
     }
     post {
         always {
-            sh 'docker logout $DOCKER_REGISTRY' // Always logout after pushing
+            sh 'docker logout $DOCKER_REGISTRY'
         }
     }
 }
